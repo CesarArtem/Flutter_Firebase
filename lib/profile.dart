@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -26,6 +27,8 @@ class _ProfileState extends State<Profile> {
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
+
   User? getCurrentUser() {
     return _auth.currentUser;
   }
@@ -52,30 +55,6 @@ class _ProfileState extends State<Profile> {
                     style: TextStyle(fontSize: 26),
                   ),
                   SizedBox(height: 50),
-                  TextFormField(
-                    controller: _loginController,
-                    validator: (value) {
-                      if (!_isValid) {
-                        return null;
-                      }
-                      if (value!.isEmpty) {
-                        return 'Поле логин пустое';
-                      }
-                      if (value.length < 3) {
-                        return 'Логин должен быть не менее 3 символов';
-                      }
-                      if (value.contains(" ")) {
-                        return 'Логин не должен содержать пробелы';
-                      }
-                      return null;
-                    },
-                    maxLength: 16,
-                    decoration: const InputDecoration(
-                      labelText: 'Логин',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  SizedBox(height: 20),
                   TextFormField(
                     maxLength: 32,
                     controller: _emailController,
@@ -128,7 +107,7 @@ class _ProfileState extends State<Profile> {
                     onPressed: () {
                       _isValid = true;
                       if (_key.currentState!.validate()) {
-                        // SaveChanges();
+                        SaveChanges();
                       } else {}
                     },
                   ),
@@ -157,5 +136,25 @@ class _ProfileState extends State<Profile> {
       context,
       MaterialPageRoute(builder: (context) => const SignIn()),
     );
+  }
+
+  void SaveChanges() async {
+    final finance = firestore.collection('Users');
+
+    final FirebaseAuth _auth = FirebaseAuth.instance;
+
+    User? currentuser = _auth.currentUser;
+
+    currentuser?.updateEmail(_emailController.text).then((_) {
+      print("Successfully changed email");
+    });
+
+    currentuser?.updatePassword(_passwordController.text).then((_) {
+      print("Successfully changed password");
+    });
+
+    finance.doc(_auth.currentUser?.uid.toString()).set(
+      {'Email': _emailController.text, 'Password': _passwordController.text},
+    ).then((value) => {setState(() {})});
   }
 }

@@ -76,7 +76,6 @@ class _FinancesState extends State<finances> {
                               child: Text(snapshot.error.toString()),
                             );
                           }
-
                           if (!snapshot.hasData) {
                             return const Center(
                                 child: CircularProgressIndicator());
@@ -335,22 +334,6 @@ class _FinancesState extends State<finances> {
       showAlertDialog(context);
     }
   }
-
-  void DeleteLogFinance() async {
-    try {
-      setState(() {});
-    } catch (exception) {
-      print(exception);
-      showAlertDialog(context);
-    }
-  }
-
-  void fillText() {
-    try {} catch (exception) {
-      print(exception);
-      showAlertDialog(context);
-    }
-  }
 }
 
 showAlertDialog(BuildContext context) {
@@ -456,17 +439,17 @@ class _FinanceItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (finance.user_id == getCurrentUser()?.uid){
+    if (finance.user_id == getCurrentUser()?.uid) {
       return Padding(
         padding: const EdgeInsets.only(bottom: 4, top: 4),
         child: Center(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
-            children: [name, description, description, summ],
+            children: [name, description, summ],
           ),
         ),
       );
     } else
-    return Container();
+      return Container();
   }
 }

@@ -1,5 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebaseflutter/auth/sing_in.dart';
+import 'package:firebaseflutter/home.dart';
+import 'package:firebaseflutter/profile.dart';
 import 'package:flutter/material.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/text_field_obscure.dart';
@@ -17,6 +20,8 @@ class _SignUpState extends State<SignUp> {
   TextEditingController _passwordController = TextEditingController();
   TextEditingController _emailController = TextEditingController();
   bool isObscure = true;
+
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -107,24 +112,34 @@ class _SignUpState extends State<SignUp> {
   }
 
   void signUp() async {
+    try{
     final auth = FirebaseAuth.instance;
     try {
       UserCredential userCredential = await auth.createUserWithEmailAndPassword(
           email: _emailController.text, password: _passwordController.text);
 
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const SignIn()),
-      );
+      userCredential = await auth.signInWithEmailAndPassword(
+          email: _emailController.text, password: _passwordController.text);
+
+      final finance = firestore.collection('Users');
+
+      finance.doc(auth.currentUser?.uid.toString()).set(
+        {'Email': _emailController.text, 'Password': _passwordController.text},
+      ).then((value) => {setState(() {})});
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
         showAlertDialog(context, 'Пароль слишком слабый');
       } else if (e.code == 'email-already-in-use') {
         showAlertDialog(
             context, 'Этот адрес электронной почты уже используется');
-      }
-      else
+      } else
         showAlertDialog(context, e.toString());
+
+        Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const HomeAdmin()),
+      );
+    }
     } catch (e) {
       showAlertDialog(context, e.toString());
     }
